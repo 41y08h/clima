@@ -14,7 +14,7 @@ class NetworkHelper {
 
       return jsonDecode(data);
     } else {
-      print(response.statusCode);
+      throw Future.error('Unable to fetch weather data');
     }
   }
 }

@@ -19,12 +19,22 @@ class _LocationScreenState extends State<LocationScreen> {
   String message;
 
   void updateWeatherData(dynamic data) {
-    setState(() {
-      temperature = data['main']['temp'].toInt();
-      city = data['name'];
-      emoji = WeatherModel().getWeatherIcon(data['weather'][0]['id']);
-      message = WeatherModel().getMessage(temperature);
-    });
+    if (data == null) {
+      print("null data received");
+      setState(() {
+        temperature = 0;
+        city = 'Error';
+        emoji = 'Error';
+        message = 'Unable to get weather data';
+      });
+    } else {
+      setState(() {
+        temperature = data['main']['temp'].toInt();
+        city = data['name'];
+        emoji = WeatherModel().getWeatherIcon(data['weather'][0]['id']);
+        message = WeatherModel().getMessage(temperature);
+      });
+    }
   }
 
   @override
@@ -56,7 +66,8 @@ class _LocationScreenState extends State<LocationScreen> {
                 children: <Widget>[
                   FlatButton(
                     onPressed: () async {
-                      final updatedData = await WeatherModel().getWeatherData();
+                      final updatedData =
+                          await WeatherModel().getLocationData();
                       updateWeatherData(updatedData);
                     },
                     child: Icon(
@@ -65,11 +76,19 @@ class _LocationScreenState extends State<LocationScreen> {
                     ),
                   ),
                   FlatButton(
-                    onPressed: () {
-                      Navigator.push(context,
+                    onPressed: () async {
+                      final cityName = await Navigator.push(context,
                           CupertinoPageRoute(builder: (context) {
                         return CityScreen();
                       }));
+
+                      if (cityName == null) return;
+
+                      final updatedData =
+                          await WeatherModel().getCityWeather(cityName);
+                      print("updated data is $updatedData");
+
+                      updateWeatherData(updatedData);
                     },
                     child: Icon(
                       Icons.location_city,
@@ -97,7 +116,7 @@ class _LocationScreenState extends State<LocationScreen> {
               Padding(
                 padding: EdgeInsets.only(right: 15.0),
                 child: Text(
-                  "$message in $city",
+                  message == 'Error' ? 'Error' : "$message in $city",
                   textAlign: TextAlign.right,
                   style: kMessageTextStyle,
                 ),

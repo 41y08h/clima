@@ -5,11 +5,16 @@ const kApiKey = "8008bcf0e10d9ad68ab28560b9dc6b49";
 const kApiUrl = "https://api.openweathermap.org/data/2.5/weather";
 
 class WeatherModel {
-  Future getWeatherData() async {
+  Future getCityWeather(String cityName) async {
+    final url = '$kApiUrl?q=$cityName&appid=$kApiKey&units=metric';
+    final weatherData = await NetworkHelper(url).getData();
+
+    return weatherData;
+  }
+
+  Future getLocationData() async {
     Location location = Location();
     await location.getCurrentLocation();
-
-    print('got location');
 
     final data = await NetworkHelper(
             '$kApiUrl?lat=${location.latitude}&lon=${location.longitude}&appid=$kApiKey&units=metric')
